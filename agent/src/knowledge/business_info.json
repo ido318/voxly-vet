@@ -1,0 +1,96 @@
+{
+  "clinic_name": "Demo Vet Clinic",
+  "vet_name": "ד\"ר דנה כהן",
+  "phone": "050-0000001",
+  "whatsapp": "+972500000001",
+  "email": "contact@example-vet.com",
+  "address": "רחוב הדוגמה 1, תל אביב-יפו, קומה 2",
+  "hours": {
+    "sunday_thursday": "08:00-20:00",
+    "friday": "08:30-13:00",
+    "saturday": "closed"
+  },
+  "booking_window_days": 14,
+  "appointment_policy": "בתיאום מראש בלבד. ביטול חינם עד 4 שעות לפני — ביטול מאוחר יותר מחויב במלואו.",
+  "visit_types": {
+    "checkup": {
+      "label_he": "בדיקה בקליניקה",
+      "duration_min": 30,
+      "buffer_min": 10,
+      "effective_min": 40,
+      "requires_approval": false,
+      "price_ils": 150,
+      "price_note": "מבוטל אם הביקור הוא לחיסון בלבד"
+    },
+    "home_visit": {
+      "label_he": "ביקור בית",
+      "duration_min": 60,
+      "buffer_min": 30,
+      "effective_min": 90,
+      "requires_approval": false,
+      "price_ils": 300,
+      "price_note": "150 ₪ אם הביקור הוא לחיסון בלבד"
+    },
+    "vaccination": {
+      "label_he": "חיסונים",
+      "duration_min": 20,
+      "buffer_min": 10,
+      "effective_min": 30,
+      "requires_approval": false
+    },
+    "phone_consultation": {
+      "label_he": "ייעוץ טלפוני",
+      "duration_min": 20,
+      "buffer_min": 0,
+      "effective_min": 20,
+      "requires_approval": false,
+      "price_ils": 200
+    },
+    "neutering": {
+      "label_he": "עיקור/סירוס",
+      "duration_min": 30,
+      "buffer_min": 10,
+      "effective_min": 40,
+      "requires_approval": true,
+      "approval_note": "תור ממתין לאישור דנה — יישלח SMS לאישור"
+    }
+  },
+  "animals_treated": ["כלב", "חתול"],
+  "is_emergency_service": false,
+  "service_area": [
+    "תל אביב", "גבעתיים", "רמת גן", "יהוד",
+    "סביון", "מזור", "רינתיה", "נופך", "מגשימים"
+  ],
+  "prices_ils": {
+    "home_visit_full_exam": 300,
+    "home_visit_vaccination_only": 150,
+    "clinic_exam": 150,
+    "clinic_exam_vaccination_only": 0,
+    "phone_consult_20min": 200,
+    "combined_vaccine_dog": 180,
+    "combined_vaccine_cat": 180,
+    "rabies_vaccine": 120,
+    "park_worm_injection": 90,
+    "annual_vaccine_package_adult_dog": 950
+  },
+  "annual_vaccine_package_includes": [
+    "חיסון כלבת", "חיסון משולב", "זריקות תולעים כל חודשיים", "דמי נסיעה"
+  ],
+  "annual_vaccine_package_excludes": ["אגרת כלבת עירונית"],
+  "services_available": [
+    "בדיקות שגרתיות", "חיסונים", "בדיקות דם",
+    "בדיקות עיניים ואוזניים", "עור ואלרגיות",
+    "מיקרוצ'יפינג", "תיעוד נסיעה לחו\"ל",
+    "ניתוחים", "המתת חסד"
+  ],
+  "store": {
+    "url": "demovettstore.com",
+    "free_delivery_over_ils": 349,
+    "phone_product_advice_free": true
+  },
+  "unknown_or_needs_confirmation": [
+    "מרפאת חירום מומלצת באזור",
+    "רשימת שאלות נפוצות FAQ מאושרת",
+    "מחיר עיקור/סירוס"
+  ]
+}

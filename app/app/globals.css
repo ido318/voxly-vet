@@ -1,0 +1,357 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Demo Vet Clinic — Design System: "Graphite Pro, lightened"
+
+   Graphite #1F2937 carries structure and the primary action. Teal #0B6B72 is
+   reserved for active and confirmed states. The four status hues (green /
+   amber / red / steel) are the only other colour in the system.
+
+   Layer order below is the design system's own:
+     palette → semantic → typography → spacing → shape → compat → base
+   Components consume the SEMANTIC layer, never the raw palette.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Palette — base values only ────────────────────────────────────────── */
+:root {
+  /* Neutral canvas / surface ramp — cool, bright, low contrast */
+  --n-0:#FFFFFF; --n-1:#FCFCFD; --n-2:#F9FAFB; --n-3:#F7F8F9; --n-4:#F1F3F5; --n-5:#E7EAED;
+
+  /* Translucent fills — how surfaces get tinted */
+  --fill-1:rgba(15,23,32,.032); --fill-2:rgba(15,23,32,.055); --fill-3:rgba(15,23,32,.085);
+
+  /* Hairlines — deliberately soft */
+  --hair-1:rgba(15,23,32,.04); --hair-2:rgba(15,23,32,.062); --hair-3:rgba(15,23,32,.095);
+
+  /* Graphite — structure, primary action, and the navigation rail */
+  --graphite-900:#111827; --graphite-800:#1A2231; --graphite-700:#1F2937; --graphite-600:#2A3441;
+  --graphite-500:#3B4654; --graphite-400:#6B7684; --graphite-300:#9AA3AF; --graphite-200:#C6CCD3;
+  --graphite-100:#E5E8EC; --graphite-050:#F2F4F6;
+
+  /* Ink */
+  --ink-1:#111827; --ink-2:#5A6472; --ink-3:#8A929E; --ink-4:#A9B0BA; --ink-5:#C8CDD4;
+
+  /* Teal — active and confirmed states only */
+  --teal-800:#075B61; --teal-700:#0B6B72; --teal-600:#0E8189;
+  --teal-300:#7FB6BA; --teal-100:#CFE4E6; --teal-050:#EAF4F5;
+
+  /* Green — done / paid */
+  --green-700:#14654A; --green-600:#1A7A55; --green-100:#CFE6DC; --green-050:#EBF5F0;
+
+  /* Amber — awaiting a human */
+  --amber-700:#73540F; --amber-600:#8A6516; --amber-100:#F2E3C0; --amber-050:#FCF5E7;
+
+  /* Red — escalation / destructive */
+  --red-700:#94271F; --red-600:#B3352E; --red-100:#F4D6D3; --red-050:#FCF1F0;
+
+  /* Steel — neutral classification */
+  --steel-700:#2F4A63; --steel-600:#3C5A76; --steel-100:#D5DEE7; --steel-050:#EFF2F6;
+
+  /* Overlay scrims */
+  --scrim:rgba(15,23,32,.20); --scrim-strong:rgba(15,23,32,.32);
+
+  /* Gap-fill: the shipped components reference these names, which the bundle's
+     token files never define. "clay" is the red family under an earlier name;
+     "slate" is steel. Defined here so the ported components resolve. */
+  --clay-300:#DFA9A4; --clay-700:var(--red-700); --clay-800:#7A1F19;
+  --slate-600:var(--steel-600);
+}
+
+/* ─── Semantic aliases — the layer components consume ───────────────────── */
+:root {
+  /* Text */
+  --text-primary:var(--ink-1); --text-secondary:var(--ink-2);
+  --text-muted:var(--ink-3); --text-faint:var(--ink-4);
+  --text-on-accent:#FFFFFF; --text-accent:var(--teal-700); --text-accent-hover:var(--teal-600);
+  --text-link:var(--teal-700);
+
+  /* Surfaces */
+  --surface-canvas:var(--n-3); --surface-page:var(--n-3); --surface-raised:var(--n-0);
+  --surface-header:var(--n-2);          /* card header row — a whisper, not a band */
+  --surface-field:var(--fill-1); --surface-sunken:var(--n-2);
+  --surface-hover:rgba(15,23,32,.022); --surface-active:var(--fill-2);
+  --surface-selected:var(--teal-050);
+
+  /* Separators */
+  --border-hairline:var(--hair-2); --border-row:var(--hair-1); --border-strong:var(--hair-3);
+  --border-field:var(--hair-2); --border-focus:var(--graphite-700);
+
+  /* Primary action — graphite */
+  --accent:var(--graphite-700); --accent-hover:var(--graphite-800); --accent-active:var(--graphite-900);
+  --accent-wash:var(--graphite-050); --accent-line:var(--graphite-600);
+
+  /* Active / confirmed — teal */
+  --active:var(--teal-700); --active-hover:var(--teal-600);
+  --active-wash:var(--teal-050); --active-line:var(--teal-600);
+
+  /* Navigation rail — dark graphite */
+  --rail-bg:var(--graphite-800); --rail-bg-hover:var(--graphite-600); --rail-bg-active:var(--graphite-600);
+  --rail-text:var(--graphite-300); --rail-text-strong:#FFFFFF; --rail-text-muted:var(--graphite-400);
+  --rail-separator:rgba(255,255,255,.07); --rail-marker:var(--teal-600);
+  /* status-critical-text is tuned for light washes and sinks into the dark
+     rail — same reasoning as the toast's lightened marks (toast.tsx). */
+  --rail-critical-text:#E9908A;
+
+  /* Status — four hues, one text tone + one wash each */
+  --status-done-text:var(--green-600);     --status-done-wash:var(--green-050);
+  --status-pending-text:var(--amber-600);  --status-pending-wash:var(--amber-050);
+  --status-critical-text:var(--red-600);   --status-critical-wash:var(--red-050);
+  --status-info-text:var(--steel-600);     --status-info-wash:var(--steel-050);
+  --status-neutral-text:var(--ink-3);      --status-neutral-wash:var(--fill-1);
+
+  /* Appointment / record type marks — the 12 source keys on four hues */
+  --type-checkup:var(--green-600); --type-consultation:var(--green-600); --type-home-visit:var(--teal-700);
+  --type-vaccination:var(--steel-600); --type-phone-consultation:var(--steel-600);
+  --type-surgery:var(--red-600); --type-neutering:var(--red-600); --type-urgent:var(--red-600);
+  --type-follow-up:var(--amber-600); --type-other:var(--ink-4);
+
+  /* Data */
+  --data-positive:var(--green-600); --data-negative:var(--red-600); --data-neutral:var(--ink-1);
+}
+
+/* ─── Typography — one family: Noto Sans Hebrew ─────────────────────────── */
+:root {
+  --font-ui:var(--font-noto-hebrew), "Noto Sans Hebrew", -apple-system, system-ui, "Segoe UI", sans-serif;
+  --font-mono:var(--font-noto-mono), "Noto Sans Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Sizes */
+  --size-page-title:22px; --size-page-title-lg:26px;
+  --size-section:13px;      /* group heading */
+  --size-row:14px;          /* primary line */
+  --size-row-sub:12.5px;    /* secondary line */
+  --size-body:13.5px;
+  --size-data:13px;
+  --size-metric:28px;
+  --size-micro:12px;
+  --size-nano:10.5px;       /* column heads */
+
+  /* Weights — no 700 anywhere */
+  --w-regular:400; --w-book:450; --w-medium:500; --w-semibold:600;
+  --w-label:500;            /* gap-fill: column heads in DataTable / InvoiceDraft */
+
+  /* Line heights */
+  --lh-title:1.15; --lh-row:1.35; --lh-body:1.5; --lh-tight:1.2;
+
+  /* Tracking — tight, and consistent in Hebrew */
+  --track-title:-.03em; --track-normal:-.012em; --track-label:.01em; --track-nano:.05em;
+
+  /* Composite roles */
+  --type-page-title:var(--w-semibold) var(--size-page-title)/var(--lh-title) var(--font-ui);
+  --type-section-label:var(--w-semibold) var(--size-section)/var(--lh-tight) var(--font-ui);
+  --type-row:var(--w-semibold) var(--size-row)/var(--lh-row) var(--font-ui);
+  --type-row-sub:var(--w-regular) var(--size-row-sub)/var(--lh-row) var(--font-ui);
+  --type-body:var(--w-regular) var(--size-body)/var(--lh-body) var(--font-ui);
+  --type-data:var(--w-medium) var(--size-data)/var(--lh-tight) var(--font-ui);
+  --type-metric:var(--w-semibold) var(--size-metric)/1 var(--font-ui);
+  --type-micro:var(--w-regular) var(--size-micro)/var(--lh-row) var(--font-ui);
+}
+
+/* ─── Spacing — 4px base. These steps are the whole scale ───────────────── */
+:root {
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:26px; --space-7:32px; --space-8:40px;
+
+  /* Layout */
+  --sidebar-w:228px; --header-h:54px; --page-gutter:22px; --content-max:1600px;
+  --col-gap:18px; --section-gap:18px; --label-gap:6px; --list-inset:15px;
+
+  /* Rows — two heights only */
+  --row-h:52px;             /* primary: time + title + one meta line */
+  --row-h-sub:38px;         /* compact supporting rows */
+  --thead-h:30px;           /* column-head row inside a card */
+  --row-pad-x-panel:14px;   /* gap-fill: panel row inset (README: hairlines inset 14px) */
+
+  /* Controls */
+  --control-h-sm:24px; --control-h:30px; --control-h-lg:36px; --field-h:32px; --chip-h:20px;
+
+  /* Surfaces */
+  --card-head-h:40px; --drawer-head-h:52px;
+  --drawer-w-sm:420px; --drawer-w:560px; --drawer-w-lg:720px;
+  --modal-w:480px; --modal-w-lg:520px;
+
+  /* Calendar */
+  --hour-h:96px; --cal-gutter-w:52px;
+}
+
+/* ─── Shape, elevation, motion ──────────────────────────────────────────── */
+:root {
+  --radius-1:4px;    /* chips, marks, calendar blocks */
+  --radius-2:6px;    /* controls, fields, small buttons */
+  --radius-3:10px;   /* cards, panels, drawers, modals */
+  --radius-round:999px;
+
+  --border-w:1px;
+  --rule:var(--border-w) solid var(--border-hairline);
+  --rule-row:var(--border-w) solid var(--border-row);
+  --rule-strong:var(--border-w) solid var(--border-strong);  /* gap-fill */
+
+  /* Elevation — a hairline ring plus one soft shadow; overlays get more. */
+  --shadow-hairline:0 0 0 .5px rgba(15,23,32,.05);
+  --shadow-raised:0 0 0 .5px rgba(15,23,32,.04),0 1px 2px rgba(15,23,32,.035);
+  --shadow-drawer:0 0 0 .5px rgba(15,23,32,.06),-18px 0 44px rgba(15,23,32,.10);
+  --shadow-modal:0 18px 52px rgba(15,23,32,.16),0 0 0 .5px rgba(15,23,32,.05);
+
+  --focus-ring:2px solid var(--border-focus); --focus-offset:2px;
+
+  /* Motion — 120ms colour, 200ms translate, no bounce */
+  --dur-fast:120ms; --dur:200ms;
+  --ease:cubic-bezier(.32,.72,0,1);
+  --transition-color:color var(--dur-fast) var(--ease),background-color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease);
+
+  --mark-size:6px;
+  --hatch:repeating-linear-gradient(135deg,var(--fill-2) 0 1px,transparent 1px 6px);
+}
+
+@media (prefers-reduced-motion:reduce) {
+  :root { --dur-fast:0ms; --dur:0ms; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Compatibility bridge — old token names → new system.
+
+   The screens still name tokens from the retired teal+coral system. Rather
+   than rewrite ~1000 call sites at once, every old name is repointed here, so
+   the whole app renders in the new language immediately. Call sites migrate to
+   semantic names incrementally; this block shrinks as they do.
+
+   Semantic shift worth knowing: the old --brand ramp was one teal used for
+   everything. The new system splits that job — graphite for action weights,
+   teal for active/confirmed markers.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Action weights → graphite */
+  --brand-800:var(--accent-active);
+  --brand-700:var(--accent-hover);
+  --brand-600:var(--accent);
+  /* Marker / focus weights */
+  --brand-500:var(--active);
+  --brand-400:var(--border-focus);   /* almost entirely focus:border-* on fields */
+  --brand-300:var(--teal-300);
+  /* Washes → teal */
+  --brand-200:var(--teal-100);
+  --brand-100:var(--teal-100);
+  --brand-50:var(--teal-050);
+
+  /* Coral is removed from the system entirely — it folds into red. */
+  --coral-800:var(--red-700); --coral-700:var(--red-700); --coral-600:var(--red-600);
+  --coral-500:var(--red-600); --coral-100:var(--red-100); --coral-50:var(--red-050);
+
+  /* Retired ramp steps (old -50 / -200 / -500) */
+  --amber-50:var(--amber-050); --amber-200:var(--amber-100); --amber-500:var(--amber-600);
+  --red-50:var(--red-050);     --red-500:var(--red-600);
+  --green-50:var(--green-050); --green-500:var(--green-600);
+
+  /* Neutrals */
+  --ink:var(--text-primary);
+  --muted:var(--text-muted);
+  --faint:var(--text-faint);
+  --line:var(--border-hairline);
+  --line-2:var(--border-row);
+  --bg:var(--surface-canvas);
+  --surface:var(--surface-raised);
+  --surface-2:var(--surface-sunken);
+
+  /* Layout — 248px rail becomes 228px */
+  --side-w:var(--sidebar-w);
+
+  /* Radius — four steps collapse onto the system's three */
+  --r-sm:var(--radius-1); --r-md:var(--radius-2); --r-lg:var(--radius-3); --r-xl:var(--radius-3);
+
+  /* Shadows — static UI gets --shadow-raised at most */
+  --sh-sm:var(--shadow-raised); --sh-md:var(--shadow-raised);
+  --sh-lg:var(--shadow-raised); --sh-pop:var(--shadow-modal);
+}
+
+/* --ink-2 is both an old alias (text-secondary) and a new palette step. The
+   palette value #5A6472 is what text-secondary resolves to, so the two agree
+   and no override is needed. */
+
+/* ─── Tailwind theme bridge ─────────────────────────────────────────────── */
+@theme inline {
+  --font-sans:var(--font-ui);
+  --font-mono:var(--font-mono);
+  --color-background:var(--surface-canvas);
+  --color-foreground:var(--text-primary);
+  --radius-sm:var(--radius-1);
+  --radius-md:var(--radius-2);
+  --radius-lg:var(--radius-3);
+}
+
+/* ─── Base ──────────────────────────────────────────────────────────────── */
+html {
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--surface-canvas);
+  color: var(--text-primary);
+  font: var(--type-body);
+  letter-spacing: var(--track-normal);
+  text-wrap: pretty;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-ui);
+  font-weight: var(--w-semibold);
+  letter-spacing: var(--track-title);
+}
+h1 { font-size: var(--size-page-title); line-height: var(--lh-title); }
+h2 { font-size: var(--size-section); letter-spacing: var(--track-label); }
+
+a { color: var(--text-link); text-decoration: none; }
+a:hover { color: var(--text-accent-hover); }
+
+:focus-visible { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+
+td, th { font-variant-numeric: tabular-nums; }
+
+/* ─── Utilities ─────────────────────────────────────────────────────────── */
+.gv-data   { font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.gv-mono   { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+.gv-ltr    { direction: ltr; text-align: end; unicode-bidi: embed; }
+.gv-section-label { font: var(--type-section-label); letter-spacing: var(--track-label); color: var(--text-primary); }
+
+/* Kept under their old names — the screens already use these. */
+.tabular   { font-variant-numeric: tabular-nums; }
+.ltr-text  { direction: ltr; text-align: right; unicode-bidi: embed; }
+
+/* ─── Keyframes ─────────────────────────────────────────────────────────── */
+@keyframes gvSpin { to { transform: rotate(360deg); } }
+
+/* RTL: the rail sits at the inline start (right), so drawers enter from the
+   inline end (left) — matching the shipped Drawer's inset-inline-end anchor. */
+@keyframes gvDrawerIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes gvFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes gvModalIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Animation classes ─────────────────────────────────────────────────── */
+/* The system specifies no page-entrance animation: this is now a no-op, kept
+   so the screens that reference it need no edit. */
+.page-enter   { animation: none; }
+.modal-enter  { animation: gvModalIn var(--dur) var(--ease) both; }
+.drawer-enter { animation: gvDrawerIn var(--dur) var(--ease) both; }
+.toast-enter  { animation: gvFadeIn var(--dur) var(--ease) both; }
+
+/* ─── Skeleton — a flat fill; the shimmer sweep is retired ──────────────── */
+.skeleton {
+  background: var(--fill-1);
+  border-radius: var(--radius-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter, .modal-enter, .drawer-enter, .toast-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

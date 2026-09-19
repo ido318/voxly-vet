@@ -1,0 +1,12 @@
+-- Drop the ghost `prompt_suggestions` table.
+--
+-- The prompt-learning loop writes `tomer_prompt_suggestions` (20260831140000).
+-- `prompt_suggestions` sat beside it as a near-namesake with a different
+-- shape — the kind of pair where a future query silently reads the wrong one
+-- and finds nothing.
+--
+-- Verified before dropping, on the cloud project (your-project-ref):
+--   * 0 rows, against 10 in tomer_prompt_suggestions
+--   * 0 inbound foreign keys
+--   * no reference anywhere in agent/ or app/
+drop table if exists public.prompt_suggestions;

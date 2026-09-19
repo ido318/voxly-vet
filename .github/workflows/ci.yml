@@ -1,0 +1,47 @@
+# Typecheck + unit tests for every PR and every push to main.
+#
+# Until now the only checks on a PR were the Vercel preview build and a
+# Supabase preview that skips, so nothing ever ran `test:all`. A change could
+# land with a red test suite and the PR would still show all-green.
+#
+# Integration tests are deliberately not run here: they need a live Supabase
+# (RUN_INTEGRATION_TESTS=true) and would need service-role credentials in CI.
+# `app/tests/setup.ts` stubs the public env vars for the unit projects, so no
+# secrets are required for this workflow.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to a PR makes the in-flight run obsolete.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck + tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 22 to match what production actually runs (agent/Dockerfile is
+      # node:22-slim), not the `engines: >=20` floor — CI should fail on what
+      # Fly would fail on. agent/package.json also pins @types/node ^22.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # npm ci installs all three workspaces (agent, app, packages/shared) from
+      # the root lockfile. @tomer/shared is rebuilt by each workspace's
+      # pretypecheck/pretest hook, so it needs no explicit build step here.
+      - run: npm ci
+
+      - run: npm run typecheck:all
+
+      - run: npm run test:all

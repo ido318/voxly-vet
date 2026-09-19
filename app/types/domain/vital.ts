@@ -1,0 +1,41 @@
+export type Vital = {
+  id: string;
+  clinicId: string;
+  customerId: string;
+  petId: string;
+  visitId: string | null;
+  recordedAt: string;
+  weightKg: number | null;
+  temperatureC: number | null;
+  heartRateBpm: number | null;
+  respiratoryRateBpm: number | null;
+  mucousMembrane: string | null;
+  capillaryRefillTime: string | null;
+  bodyConditionScore: number | null;
+  painScore: number | null;
+  hydrationStatus: string | null;
+  notes: string | null;
+  recordedByUserId: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+};
+
+export type CreateVitalInput = {
+  clinicId: string;
+  customerId: string;
+  petId: string;
+  visitId?: string | null;
+  recordedAt?: string;
+  weightKg?: number | null;
+  temperatureC?: number | null;
+  heartRateBpm?: number | null;
+  respiratoryRateBpm?: number | null;
+  mucousMembrane?: string | null;
+  capillaryRefillTime?: string | null;
+  bodyConditionScore?: number | null;
+  painScore?: number | null;
+  hydrationStatus?: string | null;
+  notes?: string | null;
+};

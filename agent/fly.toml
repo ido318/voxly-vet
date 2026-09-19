@@ -1,0 +1,31 @@
+# fly.toml app configuration file generated for voxly-agent on 2026-06-12T17:10:59+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'voxly-agent'
+primary_region = 'fra'
+
+[build]
+  dockerfile = "Dockerfile"
+  # fly.toml has no [build] key for the Docker build context — flyctl only
+  # takes it as a positional argument. The Dockerfile needs the repo root as
+  # context to reach the packages/shared workspace agent/ depends on
+  # (@tomer/shared), so deploy with:
+  #   flyctl deploy .. --config agent/fly.toml --dockerfile agent/Dockerfile
+  # (run from agent/, or adjust paths accordingly) instead of a bare
+  # `cd agent && flyctl deploy`.
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 1024

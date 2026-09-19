@@ -1,0 +1,24 @@
+{
+  "name": "voxly-vet",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hebrew voice AI agent + veterinary clinic operations dashboard",
+  "workspaces": [
+    "agent",
+    "app",
+    "packages/shared"
+  ],
+  "scripts": {
+    "test:agent": "npm test --workspace=agent",
+    "test:app": "npm test --workspace=app",
+    "test:all": "npm run test:agent && npm run test:app",
+    "typecheck:agent": "npm run typecheck --workspace=agent",
+    "typecheck:app": "npm run typecheck --workspace=app",
+    "typecheck:all": "npm run typecheck:agent && npm run typecheck:app",
+    "lint:all": "npm run lint --workspace=agent && npm run lint --workspace=app",
+    "build:all": "npm run build --workspace=agent && npm run build --workspace=app"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

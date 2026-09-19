@@ -1,0 +1,489 @@
+[
+  {
+    "type": "webhook",
+    "name": "lookup-customer",
+    "description": "מחפש לקוח קיים לפי מספר טלפון. מחזיר שם, חיות, וגם customer_id ו-pets[].id לשימוש בכלים אחרים. חובה לשלוח phone={{system__caller_id}}. אם המספר חסוי או ריק — שאל פעם אחת למספר נייד. אסור לנחש מספר.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/lookup-customer",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "חובה: {{system__caller_id}}. אם חסוי/ריק — המספר שהלקוח מסר אחרי שנשאל פעם אחת. אסור לנחש."
+          }
+        },
+        "required": ["phone"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "conversation-policy",
+    "description": "מחזיר הנחיית שיחה קצרה בעברית: מה השלב הבא, מה לומר, ומה לשאול. השתמש רק לפני triage-pet-case כשחסר הצעד הבא או כשהשיחה נתקעת בלופ. זה לא כלי טריאז' ולא מחליף את triage-pet-case. ראה סדר טיפול בפרומפט.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/conversation-policy",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "user_utterance_he": {
+            "type": "string",
+            "description": "המשפט האחרון של הלקוח בעברית"
+          },
+          "known_pet_type": {
+            "type": "string",
+            "enum": ["כלב", "חתול", "אחר"],
+            "description": "סוג החיה אם כבר ידוע"
+          },
+          "known_symptoms_he": {
+            "type": "string",
+            "description": "סיכום קצר בעברית של התסמינים שכבר נאמרו"
+          },
+          "known_duration_he": {
+            "type": "string",
+            "description": "משך הזמן אם כבר ידוע"
+          },
+          "red_flag_answers_he": {
+            "type": "array",
+            "description": "תשובות הלקוח לשאלות דגלים אדומים, אם כבר נאמרו"
+          },
+          "last_agent_action": {
+            "type": "string",
+            "description": "הפעולה האחרונה שלך, למשל ask_vomit_frequency"
+          },
+          "repeated_turns": {
+            "type": "number",
+            "description": "כמה פעמים השיחה נתקעה או חזרה על אותה נקודה"
+          }
+        },
+        "required": ["user_utterance_he"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "triage-pet-case",
+    "description": "מבצע טריאז' לתסמינים רפואיים אחרי שאספת פרטים בסיסיים ושאלת דגלי חירום רלוונטיים. המשך לפי סדר הטיפול בפרומפט: חירום מפורש → בית חולים בלי העברה לדנה. customer_id מ-lookup-customer; pet_id מ-lookup-customer או list-customer-pets.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/triage-pet-case",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "symptoms_he": {
+            "type": "string",
+            "description": "תיאור התסמינים בעברית כפי שתואר על ידי בעל החיה"
+          },
+          "pet_type": {
+            "type": "string",
+            "enum": ["כלב", "חתול", "אחר"],
+            "description": "סוג החיה"
+          },
+          "duration_he": {
+            "type": "string",
+            "description": "משך הזמן שהתסמינים קיימים (למשל 'מאתמול', 'שלושה ימים')"
+          },
+          "pet_age_years": {
+            "type": "number",
+            "description": "גיל החיה בשנים"
+          },
+          "pet_weight_kg": {
+            "type": "number",
+            "description": "משקל החיה בק\"ג"
+          },
+          "additional_signs_he": {
+            "type": "array",
+            "description": "תסמינים נוספים"
+          },
+          "customer_id": {
+            "type": "string",
+            "description": "מזהה הלקוח (UUID) מ-lookup-customer"
+          },
+          "pet_id": {
+            "type": "string",
+            "description": "מזהה החיה (UUID) מ-lookup-customer או list-customer-pets"
+          },
+          "phone": {
+            "type": "string",
+            "description": "חובה: {{system__caller_id}}. אם חסוי/ריק — המספר שהלקוח מסר. בלעדיו דנה לא תדע למי לחזור."
+          }
+        },
+        "required": ["symptoms_he", "pet_type", "phone"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "check-availability",
+    "description": "בודק תורים פנויים לסוג ביקור בתאריך נתון. חובה לפני book-appointment. בניסיון 'הכי מוקדם' — מקסימום 3 תאריכים; אחרי זה join-waitlist. בקול הצע רק 2–3 שעות.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/check-availability",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "date_iso": {
+            "type": "string",
+            "description": "תאריך בפורמט YYYY-MM-DD (למשל 2026-06-20)"
+          },
+          "visit_type": {
+            "type": "string",
+            "enum": ["checkup", "home_visit", "vaccination", "phone_consultation", "neutering", "consultation", "urgent", "follow_up", "other"],
+            "description": "סוג הביקור"
+          }
+        },
+        "required": ["date_iso", "visit_type"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "book-appointment",
+    "description": "קובע תור חדש אחרי שהלקוח אישר שעה ספציפית. scheduled_at רק מאופציית check-availability. אחרי כשל או timeout אל תקרא שוב בלי לשאול את הלקוח. אל תבטיח SMS עד ש-result אישר. עיקור/סירוס ממתין לאישור דנה.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/book-appointment",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "מספר טלפון הלקוח. ברירת מחדל {{system__caller_id}}"
+          },
+          "customer_name": {
+            "type": "string",
+            "description": "שם מלא של הלקוח"
+          },
+          "pet_name": {
+            "type": "string",
+            "description": "שם חיית המחמד"
+          },
+          "pet_species": {
+            "type": "string",
+            "enum": ["כלב", "חתול", "אחר"],
+            "description": "מין החיה"
+          },
+          "pet_breed": {
+            "type": "string",
+            "description": "גזע החיה אם הלקוח יודע, למשל לברדור, שיצו, פרסי, מעורב"
+          },
+          "scheduled_at": {
+            "type": "string",
+            "description": "בדיוק ערך scheduled_at מאופציית check-availability, כולל offset ישראלי"
+          },
+          "visit_type": {
+            "type": "string",
+            "enum": ["checkup", "home_visit", "vaccination", "phone_consultation", "neutering", "consultation", "urgent", "follow_up", "other"],
+            "description": "סוג הביקור"
+          },
+          "reason": {
+            "type": "string",
+            "description": "סיבת הביקור"
+          }
+        },
+        "required": ["phone", "customer_name", "pet_name", "pet_species", "scheduled_at", "visit_type"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "list-customer-appointments",
+    "description": "מחזיר את התורים הפעילים הקרובים של הלקוח לפי טלפון, כולל scheduled_at מדויק לביטול/הזזה. קרא כשהלקוח לא זוכר שעה. אחרי הבחירה — cancel-or-reschedule עם אותו scheduled_at.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/list-customer-appointments",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "מספר טלפון הלקוח. ברירת מחדל {{system__caller_id}}"
+          }
+        },
+        "required": ["phone"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "cancel-or-reschedule",
+    "description": "מבטל או מזיז תור קיים. action רק cancel או reschedule. דרוש אישור מפורש לפני ביטול. להזזה — check-availability קודם ואז new_scheduled_at מאופציה. אם הלקוח לא זוכר שעה — list-customer-appointments קודם. ביטול פחות מ-4 שעות לפני מחויב במלואו.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/cancel-or-reschedule",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "מספר טלפון הלקוח. ברירת מחדל {{system__caller_id}}"
+          },
+          "action": {
+            "type": "string",
+            "enum": ["cancel", "reschedule"],
+            "description": "cancel לביטול, reschedule להזזה"
+          },
+          "current_scheduled_at": {
+            "type": "string",
+            "description": "תאריך ושעה של התור הקיים מ-list-customer-appointments או מאישור הלקוח, ISO8601 עם timezone"
+          },
+          "new_scheduled_at": {
+            "type": "string",
+            "description": "שעה חדשה מאופציית check-availability (נדרש להזזה בלבד)"
+          },
+          "visit_type": {
+            "type": "string",
+            "enum": ["checkup", "home_visit", "vaccination", "phone_consultation", "neutering", "consultation", "urgent", "follow_up", "other"],
+            "description": "סוג הביקור החדש בהזזה, אם השתנה"
+          }
+        },
+        "required": ["phone", "action", "current_scheduled_at"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "join-waitlist",
+    "description": "רושם לרשימת המתנה כשאין תורים אחרי עד 3 תאריכים ב-check-availability. לפני הקריאה אמור בקול: 'אני רושם אותך להמתנה'. אישור הצלחה רק מ-result של השרת. הודעת בית חולים רק אחרי פנייה רפואית, לא אחרי כל רישום.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/join-waitlist",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "מספר טלפון הלקוח. ברירת מחדל {{system__caller_id}}"
+          },
+          "customer_name": {
+            "type": "string",
+            "description": "שם מלא של הלקוח"
+          },
+          "pet_name": {
+            "type": "string",
+            "description": "שם חיית המחמד"
+          },
+          "pet_species": {
+            "type": "string",
+            "enum": ["כלב", "חתול", "אחר"],
+            "description": "מין החיה"
+          },
+          "pet_breed": {
+            "type": "string",
+            "description": "גזע החיה אם הלקוח יודע"
+          },
+          "visit_type": {
+            "type": "string",
+            "enum": ["checkup", "home_visit", "vaccination", "phone_consultation", "neutering", "consultation", "urgent", "follow_up", "other"],
+            "description": "סוג הביקור"
+          },
+          "preferred_start": {
+            "type": "string",
+            "description": "תאריך התחלה מועדף YYYY-MM-DD"
+          },
+          "preferred_end": {
+            "type": "string",
+            "description": "תאריך סיום מועדף YYYY-MM-DD"
+          },
+          "notes": {
+            "type": "string",
+            "description": "הערות נוספות"
+          }
+        },
+        "required": ["phone", "customer_name", "pet_name", "pet_species", "visit_type"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "escalate-to-vet",
+    "description": "יוצר פנייה בדשבורד לדנה — לא העברה חיה. לעניינים לא-רפואיים בלבד (חשבונית, תלונה, שאלה שאין לה תשובה). triage-pet-case מבצע escalation פנימי בעצמו; אין לקרוא לשני הכלים על אותה פנייה רפואית. להעברה חיה השתמש ב-request-human-handoff לפי סדר הטיפול.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/escalate-to-vet",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "תיאור קצר של הפנייה"
+          },
+          "urgency": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "רמת דחיפות מ-1 (נמוכה) עד 10 (חירום)"
+          },
+          "phone": {
+            "type": "string",
+            "description": "חובה: {{system__caller_id}}. אם חסוי/ריק — המספר שהלקוח מסר. בלעדיו דנה לא תדע למי לחזור."
+          }
+        },
+        "required": ["reason", "urgency", "phone"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "request-human-handoff",
+    "description": "בודק אם אפשר להעביר את השיחה החיה לדנה. הכלי הזה לא מעביר בעצמו. אם transfer=true — קרא לכלי המערכת Transfer to number עם number. אם transfer=false — מסור רק את result. אם כלי ההעברה נכשל אחרי transfer=true — אמור שהפנייה נרשמה ואל תבטיח שהשיחה עברה. לפי סדר הטיפול: לא אחרי חירום מפורש מ-triage-pet-case.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/request-human-handoff",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "תיאור קצר של סיבת הבקשה לאדם"
+          },
+          "emergency": {
+            "type": "boolean",
+            "description": "true אם מדובר במצב חירום רפואי"
+          },
+          "phone": {
+            "type": "string",
+            "description": "חובה: {{system__caller_id}}. אם חסוי/ריק — המספר שהלקוח מסר. בלעדיו דנה לא תדע למי לחזור."
+          },
+          "conversation_id": {
+            "type": "string",
+            "description": "{{system__conversation_id}} — מקשר את הפנייה להקלטה ולתמלול בדשבורד."
+          }
+        },
+        "required": ["phone"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "list-customer-pets",
+    "description": "מאתר חיות רשומות לפי טלפון ומחזיר שם, סוג ו-pet_id. קרא רק כשצריך pet_id ל-triage-pet-case, get-patient-reminders, get-patient-chronic-conditions או get-last-visit-plan — לא אוטומטית אחרי כל lookup. אם יש יותר מחיה אחת, שאל על איזו חיה מדובר.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/list-customer-pets",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "מספר טלפון הלקוח. ברירת מחדל {{system__caller_id}}"
+          }
+        },
+        "required": ["phone"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "get-patient-reminders",
+    "description": "שולף תזכורות חיסון באיחור או קרובות לחיה שזוהתה. לא לקרוא אוטומטית ברגע שיש pet_id. רק אם רלוונטי לפנייה, ואחרי שהעניין הדחוף טופל. ראה סדר טיפול בפרומפט.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/get-patient-reminders",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "מספר טלפון הלקוח"
+          },
+          "pet_id": {
+            "type": "string",
+            "description": "מזהה החיה (UUID) מ-lookup-customer או list-customer-pets"
+          }
+        },
+        "required": ["phone", "pet_id"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "get-patient-chronic-conditions",
+    "description": "שולף רקע כרוני רשום לחיה שזוהתה. שליפת רקע בלבד — לא מחליט על תור ולא אוסר העברה. אם יש דיווח על החמרה, המשך לפי סדר הטיפול בפרומפט (קודם triage-pet-case; החלטת הטריאז' מנצחת).",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/get-patient-chronic-conditions",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "מספר טלפון הלקוח"
+          },
+          "pet_id": {
+            "type": "string",
+            "description": "מזהה החיה (UUID) מ-lookup-customer או list-customer-pets"
+          }
+        },
+        "required": ["phone", "pet_id"]
+      }
+    }
+  },
+  {
+    "type": "webhook",
+    "name": "get-last-visit-plan",
+    "description": "מחזיר את תוכנית הטיפול/המעקב מהרשומה המאושרת האחרונה. מסור רק מה שחזר מהשרת, בלי לפרש או לשנות טיפול. אם אין רשומה — אמור שאין תוכנית שמורה והצע תור או העברה לפי סדר הטיפול. אל תמציא תוכנית.",
+    "api_schema": {
+      "url": "{{AGENT_PUBLIC_URL}}/tools/get-last-visit-plan",
+      "method": "POST",
+      "request_headers": {
+        "Authorization": { "secret_id": "{{ELEVENLABS_TOOLS_SECRET_ID}}" }
+      },
+      "request_body_schema": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "מספר טלפון הלקוח"
+          },
+          "pet_id": {
+            "type": "string",
+            "description": "מזהה החיה (UUID) מ-lookup-customer או list-customer-pets"
+          }
+        },
+        "required": ["phone", "pet_id"]
+      }
+    }
+  }
+]
